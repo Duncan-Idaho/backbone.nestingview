@@ -1,0 +1,2 @@
+-r jsdom-global/register
+-R mocha-minimalist-reporter
