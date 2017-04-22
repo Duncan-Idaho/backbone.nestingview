@@ -141,6 +141,121 @@ var MotherView = Backbone.NestingView.extend({
 });
 ```
 
+## A more complex example, using Backbone.StickIt
+
+This example defines a view to display the content of a thread on a forum, and then displays it with fake data.
+
+```javascript
+Backbone.NestingView.prototype.decorate = function() {
+    this.stickit();
+}
+
+var AnswerForm = Backbone.NestingView.extend({
+    template: function() {
+        return "<form><textarea/><input type='submit' value='Submit'/></form>"
+    },
+
+    bindings: {
+        'textarea': 'content'
+    },
+
+    events: {
+        "click input[@type='submit']": 'submit'
+    },
+
+    submit: function() {
+        // do something
+    }
+});
+
+var MotherView = Backbone.NestingView.extend({
+    template: function() {
+        return "<div><h1/><span class='message-count'/></div>"
+            + "<div class='messages'>"
+            + " <div><div class='author'/><div class='date'/><div class='content'/></div>"
+            + "</div>"
+            + "<div class='answer-form'/>";
+    },
+
+    bindings: {
+        'h1': 'title',
+        '.message-count': 'message_count'
+    },
+
+    itemViews: {
+        '.messages' : {
+            collection: function() {
+                return this.model.get('messages');
+            },
+
+            bindings: {
+                '.author': 'author',
+                '.date': 'date',
+                '.content': 'content'
+            }
+        }
+    },
+
+    nestedViews: {
+        '.answer-form' : AnswerForm
+    }
+});
+
+var thread = new Backbone.Model({
+    title: 'LAN of <NAME REDACTED>',
+    message_count: 3,
+    messages: new Backbone.Collection([{
+        author: 'Edouard Paumier',
+        date: '2017-04-22T18:33:00',
+        content: "I got some free time this week, anybody wanna play ?"
+    }, {
+        author: 'Anonymous',
+        date: '2017-04-22T18:33:02',
+        content: "With you ?! Certainly not !"
+    }, {
+        author: 'Edouard Paumier',
+        date: '2017-04-22T18:42:42',
+        content: "Dude ! You type so fast !"
+    }])
+});
+
+var view = new View({model: thread});
+view.render();
+```
+
+Would render
+
+```html
+<div>
+    <h1>LAN of &lt;NAME REDACTED&gt;</h1>
+    <span class='message-count'>3</span>
+</div>
+<div class='messages'>"
+    <div>
+        <div class='author'>Edouard Paumier</div>
+        <div class='date'>2017-04-22T18:33:00</div>
+        <div class='content'>I got some free time this week, anybody wanna play ?</div>
+    </div>
+    <div>
+        <div class='author'>Anonymous</div>
+        <div class='date'>2017-04-22T18:33:02</div>
+        <div class='content'>With you ?! Certainly not !</div>
+    </div>
+    <div>
+        <div class='author'>Edouard Paumier</div>
+        <div class='date'>2017-04-22T18:42:42</div>
+        <div class='content'>Dude ! You type so fast !</div>
+    </div>
+</div>
+<div class='answer-form'>
+    <form>
+        <textarea/>
+        <input type='submit' value='Submit'/>
+    </form>
+</div>
+```
+
+
 # API
 
 Backbone.NestedView is a subclass of Backbone.
